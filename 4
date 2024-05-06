@@ -1,0 +1,115 @@
+#include <stdio.h>
+
+#define MAX_ARTICLE_NAME_LENGTH 25
+#define MAX_ARTICLES 100
+
+struct article {
+    int number;
+    char name[MAX_ARTICLE_NAME_LENGTH + 1];
+    int status;
+} inventory[MAX_ARTICLES];
+
+int num_articles = 0;
+
+int find_article(int number);
+void add_item(void);
+void search_item(void);
+void update_item(void);
+void print_items(void);
+int read_line(char str[], int n);
+
+int main() {
+    char command;
+
+    for (;;) {
+        printf("Vendosni komanden: ");
+        scanf(" %c", &command);
+        while (getchar()!= '\n') /* skip to end of line */
+            ;
+        switch (command) {
+            case 'a': add_item();
+                break;
+            case 'k': search_item();
+                break;
+            case 'u': update_item();
+                break;
+            case 'p': print_items();
+                break;
+            case 'q': return 0; // exit
+            default: printf("Komande e pavlefshme\n");
+        }
+        printf("\n");
+    }
+}
+
+int find_article(int number) {
+    int i;
+    for (i = 0; i < num_articles; i++)
+        if (inventory[i].number == number)
+            return i;
+    return -1;
+}
+
+void add_item(void) {
+    int article_number;
+    if (num_articles == MAX_ARTICLES) {
+        printf("Database is full; cannot add item.\n");
+        return;
+    }
+    printf("Vendos numrin e artikullit: ");
+    scanf("%d", &article_number);
+    if (find_article(article_number) >= 0) {
+        printf("Artikulli ekziston.\n");
+        return;
+    }
+
+    inventory[num_articles].number = article_number;
+    printf("Vendosni emrin e artikullit: ");
+    read_line(inventory[num_articles].name, MAX_ARTICLE_NAME_LENGTH);
+    printf("Vendosni statusin e artikullit: ");
+    scanf("%d", &inventory[num_articles].status);
+    num_articles++;
+}
+
+void search_item(void) {
+    int i, number;
+    printf("Vendosni numrin e artikullit: ");
+    scanf("%d", &number);
+    i = find_article(number);
+    if (i >= 0) {
+        printf("Emri i artikullit: %s\n", inventory[i].name);
+        printf("Statusi i artikullit: %d\n", inventory[i].status);
+    } else
+        printf("Artikulli nuk gjendet.\n");
+}
+
+void update_item(void) {
+    int i, number, status_change;
+    printf("Vendosni numrin e artikullit: ");
+    scanf("%d", &number);
+    i = find_article(number);
+    if (i >= 0) {
+        printf("Vendos statusin e ndryshuar : ");
+        scanf("%d", &status_change);
+        inventory[i].status += status_change;
+    } else
+        printf("Artikulli nuk gjendet.\n");
+}
+
+void print_items(void) {
+    int i;
+    printf("Article Number Article Name Article Status\n");
+    for (i = 0; i < num_articles; i++)
+        printf("%7d %25s %25d\n", inventory[i].number, inventory[i].name, inventory[i].status);
+}
+
+int read_line(char str[], int n) {
+    int ch, i = 0;
+    while ((ch = getchar()) == ' ');
+    while ((ch = getchar())!= '\n') {
+        if (i < n)
+            str[i++] = ch;
+    }
+    str[i] = '\0';
+    return i;
+}
