@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LIBRA 20
+#define MAX_AUTORE 10
+#define MAX_ISBN_LENGTH 13
+#define MAX_TITLE_LENGTH 20
+#define MAX_AUTHOR_NAME_LENGTH 20
+
+struct libri {
+    int id;
+    int faqe;
+    char isbn[MAX_ISBN_LENGTH];
+    char titulli[MAX_TITLE_LENGTH];
+};
+
+struct autori {
+    int id;
+    char emri[MAX_AUTHOR_NAME_LENGTH];
+    char mbiemri[MAX_AUTHOR_NAME_LENGTH];
+    struct libri librat[5];
+};
+
+int nr_librave = 0;
+int nr_autoreve = 0;
+
+// Funksionet për shtimin e librave dhe autorëve
+void add_liber(struct libri librat[]) {
+    if (nr_librave == MAX_LIBRA) {
+        printf("Nuk mund të shtohet më shumë libra\n");
+        return;
+    }
+    printf("Vendos titullin: ");
+    scanf("%19s", librat[nr_librave].titulli);
+    printf("Vendos isbn: ");
+    scanf("%12s", librat[nr_librave].isbn);
+    printf("Vendos numrin e faqeve: ");
+    scanf("%d", &librat[nr_librave].faqe);
+    if (find_liber_by_isbn(librat[nr_librave].isbn, librat, nr_librave) >= 0) {
+        printf("Ky ISBN ekziston tashmë\n");
+    } else {
+        librat[nr_librave].id = nr_librave;
+        nr_librave++;
+    }
+}
+
+void add_author(struct autori autoret[]) {
+    if (nr_autoreve == MAX_AUTORE) {
+        printf("Nuk mund të shtohen më shumë autore\n");
+        return;
+    }
+    printf("Vendos emrin e autorit: ");
+    scanf("%19s", autoret[nr_autoreve].emri);
+    printf("Vendos mbiemrin e autorit: ");
+    scanf("%19s", autoret[nr_autoreve].mbiemri);
+    nr_autoreve++;
+}
+
+// Funksioni për gjetjen e librit me titull
+int find_liber_by_title(char titull[], struct libri librat[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(librat[i].titulli, titull) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Funksioni për gjetjen e librit me ISBN
+int find_liber_by_isbn(char isbn[], struct libri librat[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(librat[i].isbn, isbn) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Funksioni për listimin e librave të një autori
+void list_librat_e_autorit(char emri_autorit[], struct autori autoret[], struct libri librat[]) {
+    int i, j;
+    for (i = 0; i < nr_autoreve; i++) {
+        if (strcmp(autoret[i].emri, emri_autorit) == 0) {
+            printf("Librat e autorit %s:\n", emri_autorit);
+            for (j = 0; j < 5; j++) {
+                if (autoret[i].librat[j].id != -1) {
+                    printf("Titulli: %s, ISBN: %s, Faqet: %d\n", autoret[i].librat[j].titulli, autoret[i].librat[j].isbn, autoret[i].librat[j].faqe);
+                }
+            }
+            return;
+        }
+    }
+    printf("Autori %s nuk u gjet\n", emri_autorit);
+}
+
+// Funksioni për të shfaqur menun
+void shfaq_menu() {
+    printf("\nZgjedh një opsion:\n");
+    printf("1. Shto liber\n");
+    printf("2. Shto autor\n");
+    printf("3. Listo librat e nje autori\n");
+    printf("4. Dil\n");
+}
+
+int main() {
+    struct libri librat[MAX_LIBRA];
+    struct autori autoret[MAX_AUTORE];
+
+    int opsioni;
+    char emri_autorit[MAX_AUTHOR_NAME_LENGTH];
+
+    while (1) {
+        shfaq_menu();
+        scanf("%d", &opsioni);
+
+        switch (opsioni) {
+            case 1:
+                add_liber(librat);
+                break;
+            case 2:
+                add_author(autoret);
+                break;
+            case 3:
+                printf("Vendos emrin e autorit per tu listuar librat e tij: ");
+                scanf("%19s", emri_autorit);
+                list_librat_e_autorit(emri_autorit, autoret, librat);
+                break;
+            case 4:
+                printf("Dilja nga programi...\n");
+                exit(0);
+            default:
+                printf("Opsioni i zgjedhur nuk është valid. Provo përsëri.\n");
+                break;
+        }
+    }
+
+    return 0;
+}
