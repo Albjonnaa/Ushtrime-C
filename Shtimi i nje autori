@@ -1,0 +1,162 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_LIBRA 20
+#define MAX_AUTORE 10
+#define MAX_ISBN_LENGTH 14
+#define MAX_TITLE_LENGTH 21
+#define MAX_AUTHOR_NAME_LENGTH 21
+
+struct libri {
+    int id;
+    int faqe;
+    char isbn[MAX_ISBN_LENGTH];
+    char titulli[MAX_TITLE_LENGTH];
+};
+
+struct autori {
+    int id;
+    char emri[MAX_AUTHOR_NAME_LENGTH];
+    char mbiemri[MAX_AUTHOR_NAME_LENGTH];
+    struct libri librat[5];
+};
+
+int nr_librave = 0;
+int nr_autoreve = 0;
+
+int count_librave_with_isbn_starting_with_lowercase(struct libri librat[], int size) {
+    int count = 0;
+    for (int i = 0; i < size; i++) {
+        if (isalpha(librat[i].isbn[0]) && islower(librat[i].isbn[0])) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int count_librave_by_author(struct autori autori[], int size) {
+    int count = 0;
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (autori[i].librat[j].id!= -1) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+char* find_author_with_most_librave(struct autori autoret[], int size) {
+    int max_count = 0;
+    char* author_name = "";
+    for (int i = 0; i < size; i++) {
+        int count = count_librave_by_author(&autoret[i], 1);
+        if (count > max_count) {
+            max_count = count;
+            author_name = autoret[i].emri;
+        }
+    }
+    return author_name;
+}
+
+int find_liber_by_title(char titull[], struct libri librat[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(librat[i].titulli, titull) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int find_liber_by_isbn(char isbn[], struct libri librat[], int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(librat[i].isbn, isbn) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void add_liber(struct libri librat[]) {
+    if (nr_librave == MAX_LIBRA) {
+        printf("Nuk mund të shtohet më shumë libra\n");
+        return;
+    }
+    char titull[MAX_TITLE_LENGTH + 1];
+    char isbn[MAX_ISBN_LENGTH + 1];
+    printf("Vendos titullin: ");
+    fgets(titull, MAX_TITLE_LENGTH + 1, stdin);
+    titull[strcspn(titull, "\n")] = 0; // Remove newline character
+    printf("Vendos isbn: ");
+    fgets(isbn, MAX_ISBN_LENGTH + 1, stdin);
+    isbn[strcspn(isbn, "\n")] = 0; // Remove newline character
+    int faqe;
+    printf("Vendos numrin e faqeve: ");
+    if (scanf("%d", &faqe)!= 1) {
+        printf("Invalid input\n");
+        return;
+    }
+    if (find_liber_by_isbn(isbn, librat, nr_librave) >= 0) {
+        printf("Ky ISBN ekziston tashmë\n");
+    } else {
+        strcpy(librat[nr_librave].titulli, titull);
+        strcpy(librat[nr_librave].isbn, isbn);
+        librat[nr_librave].faqe = faqe;
+        librat[nr_librave].id = nr_librave;
+        nr_librave++;
+    }
+}
+
+void add_author(struct autori autoret[]) {
+    if (nr_autoreve == MAX_AUTORE) {
+        printf("Nuk mund të shtohen më shumë autore\n");
+        return;
+    }
+    char emri[MAX_AUTHOR_NAME_LENGTH + 1];
+    char mbiemri[MAX_AUTHOR_NAME_LENGTH + 1];
+    printf("Vendos emrin e autorit: ");
+    fgets(emri, MAX_AUTHOR_NAME_LENGTH + 1, stdin);
+    emri[strcspn(emri, "\n")] = 0; // Remove newline character
+    printf("Vendos mbiemrin e autorit: ");
+    fgets(mbiemri, MAX_AUTHOR_NAME_LENGTH + 1, stdin);
+    mbiemri[strcspn(mbiemri, "\n")] = 0; // Remove newline character
+    strcpy(autoret[nr_autoreve].emri, emri);
+    strcpy(autoret[nr_autoreve].mbiemri, mbiemri);
+    nr_autoreve++;
+}
+
+int find_liber_with_min_faqe(struct libri librat[], int size) {
+    int min_faqe = librat[0].faqe;
+    int index = 0;
+    for (int i = 1; i < size; i++) {
+        if (librat[i].faqe < min_faqe) {
+            min_faqe = librat[i].faqe;
+            index = i;
+        }
+    }
+    return index;
+}
+
+int find_liber_with_longest_title(struct libri librat[], int size) {
+    int max_length = strlen(librat[0].titulli);
+    int index = 0;
+    for (int i = 1; i < size; i++) {
+        if (strlen(librat[i].titulli) > max_length) {
+            max_length = strlen(librat[i].titulli);
+            index = i;
+        }
+    }
+    return index;
+}
+
+int main() {
+    struct libri librat[MAX_LIBRA];
+    struct autori autoret[MAX_AUTORE];
+
+    add_liber(librat);
+    add_author(autoret);
+
+    return 0;
+}
